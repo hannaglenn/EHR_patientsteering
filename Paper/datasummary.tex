@@ -1,0 +1,145 @@
+\documentclass[12pt]{article}
+
+\usepackage{tgtermes}
+\usepackage{epsf}
+\usepackage{epstopdf}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage[colorlinks=true,linkcolor=blue,citecolor=blue]{hyperref}
+\usepackage{dcolumn}
+\usepackage{amsmath, amsthm, amssymb}
+\usepackage{mwe}
+\usepackage{url}
+%\usepackage{harvard}
+\usepackage{fancyheadings}
+\usepackage{longtable}
+\usepackage{authblk}
+\usepackage{setspace}
+%\usepackage[nomarkers]{endfloat}
+\usepackage{float}
+\usepackage{bbm}
+%\usepackage{titling}
+\usepackage{subcaption}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{import}
+\usepackage{colortbl}
+\usepackage{color}
+%\usepackage[nomarkers,nofiglist,notablist]{endfloat}
+
+\onehalfspacing
+\textwidth 6.5in \oddsidemargin 0in \evensidemargin -0.6in
+\textheight 8.5in \topmargin -0.2in
+
+\newcolumntype{L}[1]{>{\raggedright\let\newline\\
+		\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{C}[1]{>{\centering\let\newline\\
+		\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\let\newline\\
+		\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{P}[1]{>{\raggedright\tabularxbackslash}p{#1}}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+
+\usepackage[backend=biber,style=authoryear,
+sorting=ynt,citestyle=authoryear]{biblatex}
+\addbibresource{cites.bib}
+
+\newcommand{\xsub}[1]{%
+	\mbox{\scriptsize\begin{tabular}{@{}c@{}}#1\end{tabular}}%
+}
+
+%\renewcommand{\thetable}{\Roman{table}}
+
+\begin{document}
+
+\singlespacing
+
+\section{Hospital EHR Info}
+Sources:
+\begin{itemize}
+    \item Healthcare Information and Management Systems Society (HIMSS)
+    \begin{itemize}
+        \item 1558 hospitals have an EHR in this data
+    \end{itemize}
+    \item Meaningful use subsidy data from CMS \& CMS IT product information (Health IT Product List)
+    \begin{itemize}
+        \item 3456 hospitals have an EHR in this data
+    \end{itemize}
+    \item AHA main survey and IT survey
+    \begin{itemize}
+        \item 6253 hospitals total
+        \item 4542 who ever answer EHR vendor
+    \end{itemize}
+\end{itemize}
+
+\noindent Since the AHA main survey is the most comprehensive source of hospital characteristics, I join the other sources to this survey by Medicare number. 
+
+\noindent How I define EHR vendor for hospital:
+\begin{itemize}
+    \item If the hospital is in the meaningful use data, I use this for EHR vendor (since it is administrative)
+    \item If the hospital is not in the meaningful use data and answers only one of the surveys, I fill in EHR vendor with the survey answer.
+    \item If the hospital is not in the meaningful use data a and answers both of the surveys, I compare vendors in he two surveys. If they match, this is the assigned EHR vendor. If they do not match, I drop the observation. (Only 5\% of observations get dropped here)
+    \item If the hospital is not in any of the three data sources, I assume they do not have an EHR. 
+\end{itemize}
+
+\noindent Resulting Data:
+\begin{itemize}
+    \item 33,203 observations: 5,177 hospitals over time
+    \item location HRR, system ID, ownership type, EHR vendor
+\end{itemize}
+
+\section{PCP specialist pairs}
+Sources:
+\begin{itemize}
+    \item NPPES tax identifications
+    \begin{itemize}
+        \item limit to PCP (internal medicine, hospitalist, family medicine, general practice), and specialist (contains surgery, specialist, phlebology, otolaryngology, furology, podiatrist)
+        \item 832,825 physicians, 69\% PCP
+    \end{itemize}
+    \item MDPPAS
+    \begin{itemize}
+        \item only used to limit to physicians who never change tax ID
+        \item left with 140,000 physicians after this filtering
+    \end{itemize}
+    \item Physician Compare
+    \begin{itemize}
+        \item Used to gather hospital affiliations of each physician
+        \item 32\% of PC are dropped for having no hospital affiliation
+        \item 28\% of those left in PC  do not have an HRR code associated with the hospital (they were dropped in hospital data creation)
+        \item join to NPPES physicians: left with 110,000 phys. after this filtering
+    \end{itemize}
+    \item CMS Shared Patient Data
+\end{itemize}
+
+\noindent Creating Pairs:
+\begin{itemize}
+    \item I have 53,000 PCPs and 57,000 specialists. 
+    \item Limit the specialists to having a sufficient total number of specialists available (over 100). left with 30 specialties
+    \item For every PCP, I join ach specialist located in the same HRR, creating a data set where each row is a PCP-specialist pair in the same HRR, which is balanced from 2010-2014
+    \item Join the CMS shared patient data to these pairs, filling in with zero if the pair is not present in this data
+    \item Limit to PCPs who send positive referrals in at least two years of the data
+    \item Join hospital level information based on affiliated hospital
+\end{itemize}
+
+\section{PCP specialist practice pairs}
+
+\begin{itemize}
+    \item Start with pairs created in previous section. Aggregate over practice affiliation by summing shared patients for all the PCPs or specialists in a practice
+    \item Based on how many shared patients each physician has with hospitals, I form each practice's affiliated hospitals. 
+    \item For example, consider a practice that consists of PCP A and PCP B, where PCP A shares 5 patients with Hospital 1 and 10 patients with Hospital 2, and PCP B shares 20 patients with Hospital 1. In total, the practice shares 35 patients with hospitals 1 and 2. 25 of those patients are shared with Hospital1, and the remaining 10 are shared with Hospital 2. Thus, Hospital 1 is the practice's main affiliated hospital, and hospital 2 is the practice's secondary affiliated hospital.
+    \item The resulting data consists of PCP practice NPI, specialist practice NPI, and characteristics of the affiliated hospitals of each practice.  
+\end{itemize}
+	
+	
+\section{Graphs}
+-> just ortho. surgeons
+
+effect of PCP's main hospital switching on fraction of patients sent to specialist with same main hospital affiliation:
+
+
+\end{document}
