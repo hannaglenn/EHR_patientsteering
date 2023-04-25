@@ -11,7 +11,6 @@
 \usepackage{amsmath, amsthm, amssymb}
 \usepackage{mwe}
 \usepackage{url}
-\usepackage{natbib}
 %\usepackage{harvard}
 \usepackage{fancyheadings}
 \usepackage{longtable}
@@ -24,6 +23,9 @@
 \usepackage{subcaption}
 \usepackage{algorithm}
 \usepackage{algorithmic}
+\usepackage{import}
+\usepackage{colortbl}
+\usepackage{color}
 %\usepackage[nomarkers,nofiglist,notablist]{endfloat}
 
 \onehalfspacing
@@ -43,7 +45,9 @@
 \newtheorem{proposition}[theorem]{Proposition}
 \newtheorem{lemma}[theorem]{Lemma}
 
-
+\usepackage[backend=biber,style=authoryear,
+sorting=ynt,citestyle=authoryear]{biblatex}
+\addbibresource{cites.bib}
 
 \newcommand{\xsub}[1]{%
 	\mbox{\scriptsize\begin{tabular}{@{}c@{}}#1\end{tabular}}%
@@ -61,7 +65,7 @@
 	
 	\date{\today}
 	
-	\author{Hanna Glenn\footnote{Department of Economics, Emory University, 1602 Fishburne Drive, Atlanta, GA 30322, hkagele@emory.edu. I am grateful to for helpful discussions and feedback.} }
+	\author{Hanna Glenn\footnote{Department of Economics, Emory University, 1602 Fishburne Drive, Atlanta, GA 30322, hkagele@emory.edu. I am grateful to for helpful discussions and feedback. All errors are my own.} }
 	
 	\maketitle
 	%\setlength{\droptitle}{-10pt}
@@ -94,15 +98,19 @@
 
  \section{Introduction}
 	
-	paragraph about firms acting anti-competitively with technology
+	Anti-competitive behavior by firms is the source of much discussion and legislation, as consumers are directly impacted by competitiveness of markets. Several high profile firms have been involved in lawsuits regarding the use of  technology anti-competitively. For example, Apple developed its own music purchasing software iTunes, and prohibited music purchased on iTunes from being played on any other MP3 player. In 2006, France's Senate and National Assembly passed a law that attempted to make purchased music compatible for all MP3 players, stating that Apple was behaving anti-competitively (\cite{economist_2006}). While Apple stated that quality was the main purpose for creating the incompatibility, the company also had incentive to increase consumers' cost of switching to another MP3 player to maintain current market share. This type of firm behavior is often blocked due to anti-competitive effects.  
 
-    paragraph about hospital systems caring about referrals
+    Hospitals are a large portion of the US economy, where a third of total health care spending is contributed to hospital care (\cite{nunn2020dozen}). While hospitals' main purpose is to provide health services to the community, they still act as profit maximizing firms (even not-for-profit hospitals, at least partially (\cite{chang2011nonprofit})). Because of this, hospitals have incentive to decrease competition if it means raising profits. Recent research has focused extensively on mergers, acquisitions, and integration in health care settings that result in larger market shares. In this paper, I consider a novel way in which hospitals could use technology anti-competitively in the form of steering patient flows using information technology. 
 
-    paragraph about information technology in this industry
+    In a fee-for-service system such as Medicare, the hospital profit function is increasing in the number of Medicare patients treated. Thus, hospitals tend to care about increasing the number of patients seen within their own facility, even to the point of influencing physician referral patterns to prevent ``leakage" (patients referred to specialists outside of the hospital). Some hospital entities have been reported to illegally incentivize referrals to their facilities, publicly advertise which physicians had the most patient leakage, and seek out patients who were referred out of system to change their appointments (\cite{ellison_2018}, \cite{dyrda_2021}). While many forms of patients steering are illegal, there may be legal loopholes, such as acquiring certain facilities to get their referrals (\cite{nakamura2010hospital}). 
+    
+    One way that hospitals may attempt to steer patients is through the strategic use of information technology, specifically electronic health records (EHRs). EHR utilization in the US rapidly increased after the government began subsidizing facilities which used them meaningfully (\cite{hitech}). The percentage of hospitals with the ability to use a basic EHR system went from 9 percent in 2008 to 84 percent in 2015 (\cite{stats}). However, one of the main goals of the subsidies: interoperability (ability for different facilities to communicate), has not come to fruition. In 2015, only 6\% of health care providers could share data with other providers who use a different type of EHR system (\cite{reisman2017ehrs}). In 2019, 32\% of patients still reported having gaps in their information exchange due to data sharing capabilities (\cite{gaps}). One reason for this lack of communication across hospitals could be explained by hospitals acting strategically in their choice of EHR to maintain market share or steer patients towards their facility. In this paper, I investigate whether a hospital's choice of EHR has implications on where patients in the market go for care. That is, I estimate the effect of a hospital switching to a given EHR on quantity of patients treated, where the mechanism for such a change stems from physician referrals. 
 
-    outline my preliminary reduced form evidence
+    To answer this question, I gather detailed information on hospital EHR choices from three different data sources, where any existing studies in this area typically only use one or two sources (\cite{desai2016role}, \cite{lin2021strategic}, \cite{xueeffects}). I form pairs of primary care physicians who refer to specialists using the Center for Medicaid and Medicare Services (CMS) Shared Patient data. All physicians in the sample are affiliated with at least one hospital, and I link each physician to hospital characteristics (including EHR) of their affiliated hospitals.
 
-    outline my discrete choice model
+    I first provide reduced form evidence that a hospital's choice of EHR affects physician referral patterns in a way that potentially benefits the hospital or the system the hospital belongs to. I use a difference-in-difference methodology to investigate whether a primary care physician (PCP) connected to a given hospital changes referral patterns to specialists when the connected hospital switches or adopts an EHR. That is, I estimate the effect of a connected hospital changing EHR behavior on the fraction of referrals sent to specialists within hospital or within hospital system. I find that PCPs substitute out-of-system specialists for in-system specialists when their affiliated hospital switches EHR, indicating that hospital systems who switch potentially benefit from switching in terms of patients referred to them. 
+
+    To get a more concrete sense of the quantity of patients a hospital can expect to gain or lose by switching to a given EHR, I estimate a discrete choice model of physician referrals. To reduce the computational burden and avoid issues where individual physicians are not independent from each other, I estimate at the PCP-practice and specialist-practice level. That is, each PCP-practice faces a market for specialist-practices, and I observe aggregate market shares, the fraction of patients sent to each specialist-practice. I use standard market share demand estimation strategies. (explain this better after I do it) 
 
     preview of results
 
@@ -112,8 +120,33 @@
 
     \section{Data}
 
-    
+    I obtain data from multiple sources to create a main data set that captures the number of Medicare patients shared between a primary care physician (PCP) practice and a specialist practice, along with information on hospital affiliations of those practices. I focus on years 2010-2014, as this is the time period of rapid EHR growth and adjustments and the availability of the public data. I describe the construction of this data in the following stages: hospital characteristics, PCP-specialist pairs, and practice level variables. 
 
+    \subsection{Hospital Characteristics}\label{subsec:hospital characteristics}
+
+    In order to understand how physicians respond to different hospital behaviors with EHRs, it is vital to have an accurate and detailed picture of hospital level EHR characteristics. I obtain granular EHR information from three different data sets: Healthcare Information and Management Systems Society (HIMSS), the American Hospital Association (AHA) Annual Survey \& IT Supplement, and Center for Medicaid and Medicare Services (CMS) data on meaningful use subsidies. Both the HIMSS and AHA IT Survey directly ask hospitals to select which type of EHR they use. The CMS meaningful use data is administrative: when a hospital applies for meaningful use subsidies according to the HITECH Act, they must have an approved "meaningful" EHR. CMS records an ID corresponding to the system that has been approved. All of these system IDs can be linked to EHR brands through an online database, Health IT Product List.\footnote{https://chpl.healthit.gov} 
+
+    I combine all three of these sources. Taking any one of them individually yields missing data for a large subset of hospitals. Therefore, the most complete picture of hospital EHR decisions needs all three. I prioritize the CMS data since it is administrative in nature. For hospitals who do not receive meaningful use subsidies (and thus are not in this data), I fill in missing values with whichever survey the hospital answered. In most cases, only one of the surveys is answered. In the rare case of the hospital answering both surveys and the answers being different (only 5\% of observations), I drop the observation since there could be a response error. Approximately 70\% of hospitals record an EHR brand in at least one year of the sample, which is only slightly lower than overall patterns of EHR adoption (\cite{healthitstats_2017}). A hospital is said to switch their EHR brand if one year's EHR brand is different from the next. 
+
+    Other hospital level characteristics such as size and ownership are from the AHA survey. I present a table of means summarizing the hospital characteristics for the entire sample, and switchers vs. non-switchers in Table \ref{hospital_sumstats}. 8\% of the sample ever switches their EHR brand. Hospitals who switch tend to be larger and more likely to be a part of a system of hospitals. Further, hospitals who switch are more likely to be not-for-profit hospitals. 
+
+    \import{Tables}{Hospital_sumstats_byswitchers.tex}
+
+    I also present a transition matrix of EHR brands in Table \ref{transition_matrix}. In total, there are 12 brands of EHRs large enough that they overlap in all three sources of EHR information. Currently, the two largest brands are EPIC and Cerner. Over the course of my sample, many hospitals are switching to these brands, though there is variation in both brand switched from and brand switched to. 
+
+    \import{Tables}{transition_matrix.tex}
+
+    \import{Tables}{adopt_matrix.tex}
+
+    \subsection{PCP-specialist pairs}
+
+    The goal of this section is to explain how I derive data on PCP-specialist pairs with the number of referrals from the PCP to the specialist. First, using National Plan and Provider Enumeration System (NPPES), I gather all physician National Provider Identifiers (NPI) for primary care physicians (PCP) and specialists. Any physician with classification internal medicine, family practice, hospitalist, or general practice is a PCP. Any physician with classification containing surgery, specialist, phlebology, otolaryngology, urology, or podiatrist is a specialist. 
+
+    I connect each physician to their affiliated hospitals using Physician Compare data from CMS. In this data, physicians are affiliated with a hospital based on shared claims. I drop physicians who are not associated with any hospital (30\% of the sample) since the main objective of the paper is to investigate physician response to hospital changes, which is not applicable for physicians who do not typically send patients to hospitals. A limitation of this data is that physician-hospital affiliation only exists in 2014. Thus, I use another data set to limit physicians in my sample to those who did not change their tax affiliations throughout the sample. This allows me to extrapolate the hospital affiliations to be constant. 
+
+    I then merge the hospital level characteristics created in Section \ref{subsec:hospital characteristics} by hospital affiliation. Included in these characteristics is the Hospital Referral Region (HRR). These are markets created based on referral patterns by Dartmouth Atlas of Health Care. Using the HRR of each physician's main affiliated hospital, I form all possible combinations of PCP-specialist pairs where the PCP and specialist are located in the same HRR. Importantly, this does not yet capture which specialists a PCP actually referred to, just the choice set of all specialists in their HRR. 
+
+    The data used to capture information on realized referrals is the CMS Shared Patient data. This data captures the number of Medicare patients seen by two entities within a given amount of time (30, 60, 90 or 180 days). I use the 180 day version of the data to capture as many referrals as possible. Thus, for any two physicians, the data captures the number of times a patient sees one physician and then the other within 180 days. I merge this data to the pairs of physicians in the same HRR to observe referral behavior within markets.  
 	
 	
     \section{Reduced Form Evidence}
